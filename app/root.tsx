@@ -8,6 +8,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Tell the browser we support both schemes and paint the right
+            background on the very first frame, before global.css loads. */}
+        <meta name="color-scheme" content="light dark" />
+        <style
+          dangerouslySetInnerHTML={{
+            __html:
+              ":root{color-scheme:light dark;background-color:#fafafa}" +
+              "@media(prefers-color-scheme:dark){:root:not([data-force-light]){background-color:#0f0f1a}}",
+          }}
+        />
         <meta
           name="theme-color"
           content="#fafafa"
