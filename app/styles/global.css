@@ -534,6 +534,33 @@ code {
   cursor: default;
 }
 
+.map-frame {
+  width: 100%;
+  height: 340px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: block;
+}
+
+.map-show-btn {
+  width: 100%;
+  padding: 1.5rem 1rem;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  background: var(--color-background);
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.map-show-btn:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 .map-buttons {
   display: flex;
   flex-wrap: wrap;
