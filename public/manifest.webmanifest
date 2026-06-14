@@ -1,0 +1,20 @@
+{
+  "name": "Latitude / Longitude Tool",
+  "short_name": "Lat / Long",
+  "description": "Paste any latitude/longitude format and get every other format, precision, and map links.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "theme_color": "#0f0f1a",
+  "background_color": "#0f0f1a",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

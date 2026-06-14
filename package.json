@@ -12,6 +12,7 @@
     "fmt:check": "oxfmt --check .",
     "typecheck": "react-router typegen && tsc",
     "og": "node scripts/make-og.mjs",
+    "icons": "node scripts/make-icons.mjs",
     "prepare": "lefthook install"
   },
   "dependencies": {

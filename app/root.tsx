@@ -1,6 +1,9 @@
+import { useEffect } from "react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import "@fontsource-variable/inter";
 import "./styles/global.css";
+
+const base = import.meta.env.BASE_URL;
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -30,14 +33,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
         <link
           rel="icon"
-          href="/favicon-light.svg"
+          href={`${base}favicon-light.svg`}
           media="(prefers-color-scheme: light)"
         />
         <link
           rel="icon"
-          href="/favicon-dark.svg"
+          href={`${base}favicon-dark.svg`}
           media="(prefers-color-scheme: dark)"
         />
+        <link rel="apple-touch-icon" href={`${base}apple-touch-icon.png`} />
+        <link rel="manifest" href={`${base}manifest.webmanifest`} />
         <Meta />
         <Links />
         {import.meta.env.DEV && (
@@ -58,5 +63,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  // Register the service worker so the tool works offline and is installable.
+  // Production only — a dev service worker would cache stale assets and fight
+  // HMR / tests.
+  useEffect(() => {
+    if (!import.meta.env.PROD || !("serviceWorker" in navigator)) return;
+    navigator.serviceWorker
+      .register(`${base}sw.js`, { scope: base })
+      .catch(() => {
+        // Service worker is a progressive enhancement; ignore failures.
+      });
+  }, []);
+
   return <Outlet />;
 }
