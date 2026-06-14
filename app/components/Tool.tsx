@@ -25,6 +25,7 @@ import { buildExamples, type Example } from "~/lib/examples";
 import { CopyButton } from "./CopyButton";
 import { HighlightedInput } from "./HighlightedInput";
 import { MapIcon } from "./MapIcon";
+import { What3Words } from "./What3Words";
 
 interface Row {
   label: string;
@@ -183,6 +184,7 @@ export function Tool() {
         <div className="results">
           <Section title="Formats" rows={formatRows(coord)} copyable />
           <Section title="Statistics" rows={statRows(coord)} />
+          <What3Words coord={coord} />
 
           <div className="maps">
             <h2>Open in maps</h2>

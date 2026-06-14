@@ -22,13 +22,13 @@ test.describe("Latitude / Longitude Tool", () => {
   }) => {
     await expect(page.locator(".examples")).toBeVisible();
     await expect(page.locator(".results")).toHaveCount(0);
-    await page.getByRole("textbox").fill(NYC);
+    await page.locator("#coord-input").fill(NYC);
     await expect(page.locator(".results")).toBeVisible();
     await expect(page.locator(".examples")).toHaveCount(0);
   });
 
   test("converts a decimal-degrees value to every format", async ({ page }) => {
-    await page.getByRole("textbox").fill(NYC);
+    await page.locator("#coord-input").fill(NYC);
     const results = page.locator(".results");
     await expect(results).toContainText("40° 44.929′ N, 73° 59.126′ W"); // DDM
     await expect(results).toContainText("40° 44′ 55.74″ N, 73° 59′ 7.54″ W"); // DMS
@@ -43,7 +43,7 @@ test.describe("Latitude / Longitude Tool", () => {
   test("highlights the latitude and longitude parts of the input", async ({
     page,
   }) => {
-    await page.getByRole("textbox").fill(NYC);
+    await page.locator("#coord-input").fill(NYC);
     await expect(page.locator(".coord-backdrop .hl-lat")).toHaveText(
       "40.748817",
     );
@@ -53,7 +53,7 @@ test.describe("Latitude / Longitude Tool", () => {
   });
 
   test("parses a DMS string and labels the format", async ({ page }) => {
-    await page.getByRole("textbox").fill(`51°28'40.1"N 0°00'05.3"W`); // Greenwich
+    await page.locator("#coord-input").fill(`51°28'40.1"N 0°00'05.3"W`); // Greenwich
     await expect(page.locator(".format-badge")).toContainText("DMS");
     await expect(page.locator(".results")).toContainText("51.47781, -0.00147");
     await expect(page.locator(".assumption")).toHaveCount(0);
@@ -62,7 +62,7 @@ test.describe("Latitude / Longitude Tool", () => {
   test("offers a swap assumption for ambiguous order and applies it", async ({
     page,
   }) => {
-    await page.getByRole("textbox").fill("10, 20");
+    await page.locator("#coord-input").fill("10, 20");
     const swap = page.getByRole("checkbox");
     await expect(swap).toBeVisible();
     await expect(page.locator(".results")).toContainText("10° N, 20° E");
@@ -71,7 +71,7 @@ test.describe("Latitude / Longitude Tool", () => {
   });
 
   test("auto-resolves order when a value exceeds 90", async ({ page }) => {
-    await page.getByRole("textbox").fill("-122.4194, 37.7749"); // lon first
+    await page.locator("#coord-input").fill("-122.4194, 37.7749"); // lon first
     await expect(page.locator(".assumption")).toHaveCount(0);
     await expect(page.locator(".results")).toContainText(
       "37.7749° N, 122.4194° W",
@@ -81,19 +81,19 @@ test.describe("Latitude / Longitude Tool", () => {
   test("attaches a hemisphere letter to its own value (1,3S)", async ({
     page,
   }) => {
-    await page.getByRole("textbox").fill("1,3S");
+    await page.locator("#coord-input").fill("1,3S");
     await expect(page.locator(".results")).toContainText("3° S, 1° E");
     await expect(page.locator(".assumption")).toHaveCount(0);
   });
 
   test("shows an error for out-of-range input", async ({ page }) => {
-    await page.getByRole("textbox").fill("200, 10");
+    await page.locator("#coord-input").fill("200, 10");
     await expect(page.locator(".error")).toBeVisible();
     await expect(page.locator(".results")).toHaveCount(0);
   });
 
   test("builds correct map-service links", async ({ page }) => {
-    await page.getByRole("textbox").fill(NYC);
+    await page.locator("#coord-input").fill(NYC);
     const google = page.getByRole("link", { name: /Google Maps/ });
     await expect(google).toHaveAttribute(
       "href",
@@ -112,7 +112,7 @@ test.describe("Latitude / Longitude Tool", () => {
     const chip = page.locator(".example-chip").first();
     const text = (await chip.textContent())!;
     await chip.click();
-    await expect(page.getByRole("textbox")).toHaveValue(text);
+    await expect(page.locator("#coord-input")).toHaveValue(text);
     await expect(page.locator(".results")).toBeVisible();
     expect(new URL(page.url()).searchParams.get("q")).toBe(text);
   });
@@ -120,7 +120,7 @@ test.describe("Latitude / Longitude Tool", () => {
   test("reads the coordinate from the q query parameter", async ({ page }) => {
     await page.goto(`/?q=${encodeURIComponent(NYC)}`);
     await page.locator("html[data-hydrated]").waitFor();
-    await expect(page.getByRole("textbox")).toHaveValue(NYC);
+    await expect(page.locator("#coord-input")).toHaveValue(NYC);
     await expect(page.locator(".results")).toBeVisible();
   });
 });

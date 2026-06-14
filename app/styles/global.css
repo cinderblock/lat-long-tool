@@ -475,6 +475,65 @@ code {
   border-color: var(--color-primary);
 }
 
+.w3w-note {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  padding: 0.5rem 0 0.4rem;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  text-decoration: underline;
+}
+
+.w3w-setup {
+  padding-bottom: 0.6rem;
+}
+
+.w3w-key-row {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 28rem;
+}
+
+.w3w-key-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.45rem 0.6rem;
+  color: var(--color-text);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+}
+
+.w3w-save {
+  padding: 0.45rem 0.9rem;
+  font-weight: 500;
+  color: white;
+  background: var(--color-primary);
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.w3w-save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .map-buttons {
   display: flex;
   flex-wrap: wrap;
