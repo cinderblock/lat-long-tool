@@ -24,6 +24,7 @@ import {
 import { buildExamples, type Example } from "~/lib/examples";
 import { CopyButton } from "./CopyButton";
 import { HighlightedInput } from "./HighlightedInput";
+import { MapIcon } from "./MapIcon";
 
 interface Row {
   label: string;
@@ -194,7 +195,11 @@ export function Tool() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {l.name} ↗
+                  <MapIcon name={l.name} />
+                  {l.name}
+                  <span className="map-btn-ext" aria-hidden="true">
+                    ↗
+                  </span>
                 </a>
               ))}
             </div>
