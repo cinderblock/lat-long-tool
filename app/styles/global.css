@@ -15,6 +15,8 @@
   --color-border: #e2e2e8;
   --color-primary: #2563eb;
   --color-primary-hover: #1d4ed8;
+  --color-lat: #2563eb;
+  --color-lon: #0d9488;
   --font-sans:
     "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, sans-serif;
@@ -30,6 +32,8 @@
     --color-border: #2a2a3e;
     --color-primary: #3b82f6;
     --color-primary-hover: #60a5fa;
+    --color-lat: #60a5fa;
+    --color-lon: #2dd4bf;
   }
 }
 
@@ -184,23 +188,87 @@ code {
   margin-bottom: 0.5rem;
 }
 
-.coord-input {
-  width: 100%;
-  font-family: var(--font-mono);
-  font-size: 1.1rem;
-  line-height: 1.5;
-  padding: 0.85rem 1rem;
-  color: var(--color-text);
+/* Single-line input with a mirrored backdrop for lat/lon highlighting. */
+.coord-field {
+  position: relative;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 10px;
-  resize: vertical;
 }
 
-.coord-input:focus-visible {
+.coord-field:focus-within {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-color: var(--color-primary);
+}
+
+.coord-field.is-invalid {
+  border-color: color-mix(in srgb, #ef4444 55%, var(--color-border));
+}
+
+.coord-input,
+.coord-backdrop {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  padding: 0.85rem 7.5rem 0.85rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  white-space: pre;
+  overflow-x: auto;
+  letter-spacing: 0;
+}
+
+.coord-input {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  color: var(--color-text);
+  background: transparent;
+  caret-color: var(--color-text);
+  scrollbar-width: none;
+}
+
+.coord-input::-webkit-scrollbar {
+  display: none;
+}
+
+.coord-input:focus {
+  outline: none;
+}
+
+.coord-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  color: transparent;
+  pointer-events: none;
+  scrollbar-width: none;
+}
+
+.coord-backdrop .hl {
+  border-radius: 3px;
+  padding-bottom: 1px;
+}
+
+.coord-backdrop .hl-lat {
+  background: color-mix(in srgb, var(--color-lat) 24%, transparent);
+  box-shadow: inset 0 -2px 0 var(--color-lat);
+}
+
+.coord-backdrop .hl-lon {
+  background: color-mix(in srgb, var(--color-lon) 24%, transparent);
+  box-shadow: inset 0 -2px 0 var(--color-lon);
+}
+
+.coord-badge {
+  position: absolute;
+  top: 50%;
+  right: 0.6rem;
+  transform: translateY(-50%);
+  z-index: 2;
+  pointer-events: none;
 }
 
 .examples {
@@ -289,44 +357,35 @@ code {
   gap: 1.25rem;
 }
 
-.summary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.5rem 1rem;
-  padding: 1.1rem 1.25rem;
+.format-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
-}
-
-.summary-main {
-  font-family: var(--font-mono);
-  font-size: clamp(1.3rem, 4vw, 1.9rem);
-  font-weight: 600;
-}
-
-.summary-lat {
-  color: var(--color-primary);
-}
-
-.summary-lon {
-  color: var(--color-primary);
-}
-
-.summary-sep {
-  color: var(--color-text-muted);
-  margin: 0 0.15rem;
-}
-
-.format-badge {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-text-muted);
-  background: color-mix(in srgb, var(--color-text-muted) 12%, transparent);
-  padding: 0.2rem 0.55rem;
+  padding: 0.28rem 0.55rem;
   border-radius: 999px;
+  white-space: nowrap;
+}
+
+.badge-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.badge-dot-lat {
+  background: var(--color-lat);
+}
+
+.badge-dot-lon {
+  background: var(--color-lon);
+  margin-left: 0.25rem;
 }
 
 .card {

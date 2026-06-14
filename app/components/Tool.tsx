@@ -21,16 +21,9 @@ import {
   toUTM,
   type Coordinate,
 } from "~/lib/coords";
+import { buildExamples, type Example } from "~/lib/examples";
 import { CopyButton } from "./CopyButton";
-
-const EXAMPLES = [
-  "40.748817, -73.985428",
-  `40°44'55.7"N 73°59'7.5"W`,
-  "40° 44.929' N, 73° 59.126' W",
-  "S33.8568 E151.2153",
-  "geo:48.8584,2.2945",
-  "https://www.google.com/maps/@51.5007,-0.1246,17z",
-];
+import { HighlightedInput } from "./HighlightedInput";
 
 interface Row {
   label: string;
@@ -61,7 +54,6 @@ function formatRows(c: Coordinate): Row[] {
 
 function statRows(c: Coordinate): Row[] {
   const res = estimateResolution(c);
-  const anti = antipode(c);
   const digits = Math.max(res.latDecimals, res.lonDecimals);
   return [
     {
@@ -76,20 +68,41 @@ function statRows(c: Coordinate): Row[] {
     { label: "Hemispheres", value: hemisphereDescription(c) },
     {
       label: "Antipode",
-      value: `${anti.lat.toFixed(6)}, ${anti.lon.toFixed(6)}`,
+      value: formatDDHemi(antipode(c)),
       hint: "opposite side of Earth",
     },
   ];
 }
 
-export function Tool() {
-  const [input, setInput] = useState(EXAMPLES[0]);
-  const [swap, setSwap] = useState(false);
+function readQuery(): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("q") ?? "";
+}
 
-  // Signals that the app is interactive (used as a readiness marker by tests).
+function writeQuery(value: string) {
+  const url = new URL(window.location.href);
+  if (value) url.searchParams.set("q", value);
+  else url.searchParams.delete("q");
+  window.history.replaceState(null, "", url);
+}
+
+export function Tool() {
+  const [input, setInput] = useState("");
+  const [swap, setSwap] = useState(false);
+  // Seeded so the server and first client render agree; randomized on mount.
+  const [examples, setExamples] = useState<Example[]>(() => buildExamples(1));
+
   useEffect(() => {
     document.documentElement.dataset.hydrated = "true";
+    const q = readQuery();
+    if (q) setInput(q);
+    setExamples(buildExamples(Math.floor(Math.random() * 1e9)));
   }, []);
+
+  const updateInput = (value: string) => {
+    setInput(value);
+    if (typeof window !== "undefined") writeQuery(value);
+  };
 
   const result = useMemo(
     () => parseCoordinates(input, { ...defaultAssumptions, swapLatLon: swap }),
@@ -97,39 +110,49 @@ export function Tool() {
   );
 
   const coord = result.coordinate;
+  const hasInput = input.trim().length > 0;
 
   return (
     <div className="tool">
       <label className="input-label" htmlFor="coord-input">
         Paste a latitude / longitude
       </label>
-      <textarea
+      <HighlightedInput
         id="coord-input"
-        className="coord-input"
         value={input}
-        onChange={(e) => setInput(e.target.value)}
-        spellCheck={false}
-        rows={2}
+        onChange={updateInput}
+        spans={{ latSpan: result.latSpan, lonSpan: result.lonSpan }}
+        invalid={hasInput && !coord}
         placeholder={`e.g. 40°44'55.7"N 73°59'7.5"W`}
-        autoComplete="off"
+        badge={
+          coord ? (
+            <span className="format-badge">
+              <span className="badge-dot badge-dot-lat" /> lat
+              <span className="badge-dot badge-dot-lon" /> lon · {result.format}
+            </span>
+          ) : null
+        }
       />
 
-      <div className="examples">
-        <span className="examples-label">Try:</span>
-        {EXAMPLES.map((ex) => (
-          <button
-            key={ex}
-            type="button"
-            className="example-chip"
-            onClick={() => {
-              setSwap(false);
-              setInput(ex);
-            }}
-          >
-            {ex}
-          </button>
-        ))}
-      </div>
+      {!coord && (
+        <div className="examples">
+          <span className="examples-label">Try:</span>
+          {examples.map((ex) => (
+            <button
+              key={ex.text}
+              type="button"
+              className="example-chip"
+              title={ex.label}
+              onClick={() => {
+                setSwap(false);
+                updateInput(ex.text);
+              }}
+            >
+              {ex.text}
+            </button>
+          ))}
+        </div>
+      )}
 
       {result.orderAmbiguous && (
         <label className="assumption">
@@ -153,19 +176,10 @@ export function Tool() {
         </p>
       ))}
 
-      {!result.ok && input.trim() && <p className="error">{result.error}</p>}
+      {hasInput && !coord && <p className="error">{result.error}</p>}
 
       {coord && (
         <div className="results">
-          <div className="summary">
-            <div className="summary-main">
-              <span className="summary-lat">{coord.lat.toFixed(6)}</span>
-              <span className="summary-sep">,</span>
-              <span className="summary-lon">{coord.lon.toFixed(6)}</span>
-            </div>
-            <span className="format-badge">parsed as {result.format}</span>
-          </div>
-
           <Section title="Formats" rows={formatRows(coord)} copyable />
           <Section title="Statistics" rows={statRows(coord)} />
 
