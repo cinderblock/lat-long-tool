@@ -1,0 +1,35 @@
+{
+  "name": "lat-long-tool",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "react-router dev",
+    "build": "react-router build",
+    "preview": "vite preview --outDir build/client",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "fmt": "oxfmt --write .",
+    "fmt:check": "oxfmt --check .",
+    "typecheck": "react-router typegen && tsc",
+    "prepare": "lefthook install"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.2.8",
+    "@react-router/node": "^7.17.0",
+    "isbot": "^5.1.42",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router": "^7.17.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@react-router/dev": "^7.17.0",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "lefthook": "^2.1.9",
+    "oxfmt": "^0.54.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16"
+  }
+}
