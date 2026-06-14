@@ -1,6 +1,6 @@
-# Lat / Long Tool
+# Latitude / Longitude Tool
 
-Paste a latitude/longitude in almost any format and instantly get every other
+Paste a latitude/longitude in almost any format and instantly get every
 format, precision statistics, and one-click links into popular map services.
 Everything runs locally in the browser — no coordinates are ever sent anywhere.
 

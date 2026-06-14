@@ -9,9 +9,9 @@ test.describe("Lat / Long Tool", () => {
   });
 
   test("has descriptive title and heading", async ({ page }) => {
-    await expect(page).toHaveTitle(/Lat \/ Long Tool/);
+    await expect(page).toHaveTitle(/Latitude \/ Longitude Tool/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "Lat / Long Tool",
+      "Latitude / Longitude Tool",
     );
   });
 
