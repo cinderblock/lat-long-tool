@@ -4,6 +4,7 @@ import type { Spans } from "~/lib/coords";
 interface Props {
   value: string;
   onChange: (value: string) => void;
+  onClear?: () => void;
   spans: Spans;
   badge?: ReactNode;
   invalid?: boolean;
@@ -48,6 +49,7 @@ function range([start, end]: [number, number]) {
 export function HighlightedInput({
   value,
   onChange,
+  onClear,
   spans,
   badge,
   invalid,
@@ -87,7 +89,20 @@ export function HighlightedInput({
         autoCapitalize="off"
         placeholder={placeholder}
       />
-      {badge && <div className="coord-badge">{badge}</div>}
+      <div className="coord-adornments">
+        {badge}
+        {value && onClear && (
+          <button
+            type="button"
+            className="coord-clear"
+            onClick={onClear}
+            aria-label="Clear input"
+            title="Clear"
+          >
+            ✕
+          </button>
+        )}
+      </div>
     </div>
   );
 }

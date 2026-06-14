@@ -26,7 +26,6 @@ import { CopyButton } from "./CopyButton";
 import { HighlightedInput } from "./HighlightedInput";
 import { MapIcon } from "./MapIcon";
 import { MapPreview } from "./MapPreview";
-import { What3Words } from "./What3Words";
 
 interface Row {
   label: string;
@@ -124,6 +123,7 @@ export function Tool() {
         id="coord-input"
         value={input}
         onChange={updateInput}
+        onClear={() => updateInput("")}
         spans={{ latSpan: result.latSpan, lonSpan: result.lonSpan }}
         invalid={hasInput && !coord}
         placeholder={`e.g. 40°44'55.7"N 73°59'7.5"W`}
@@ -186,7 +186,6 @@ export function Tool() {
           <Section title="Formats" rows={formatRows(coord)} copyable />
           <Section title="Statistics" rows={statRows(coord)} />
           <MapPreview coord={coord} />
-          <What3Words coord={coord} />
 
           <div className="maps">
             <h2>Open in maps</h2>

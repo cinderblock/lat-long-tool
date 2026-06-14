@@ -32,8 +32,8 @@ export default function Home() {
       <footer className="page-footer">
         <p>
           All parsing and conversion runs locally in your browser. The optional
-          map preview and what3words lookup are the only features that contact
-          an external service, and only after you enable them.
+          map preview is the only feature that loads external data (map tiles),
+          and only after you enable it.
         </p>
       </footer>
     </main>

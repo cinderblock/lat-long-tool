@@ -37,6 +37,10 @@ export function mapLinks(c: Coordinate): MapLink[] {
       url: `https://www.waze.com/ul?ll=${pair}&navigate=yes`,
     },
     {
+      name: "what3words",
+      url: `https://what3words.com/?maptype=roadmap&zoom=19&center=${pair}`,
+    },
+    {
       name: "geohash.org",
       url: `http://geohash.org/${encodeGeohash(c.lat, c.lon, 9)}`,
     },

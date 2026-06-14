@@ -211,7 +211,7 @@ code {
   font-family: var(--font-mono);
   font-size: 1.1rem;
   line-height: 1.6;
-  padding: 0.85rem 7.5rem 0.85rem 1rem;
+  padding: 0.85rem 9.5rem 0.85rem 1rem;
   border: 1px solid transparent;
   border-radius: 10px;
   white-space: pre;
@@ -262,13 +262,38 @@ code {
   box-shadow: inset 0 -2px 0 var(--color-lon);
 }
 
-.coord-badge {
+.coord-adornments {
   position: absolute;
   top: 50%;
   right: 0.6rem;
   transform: translateY(-50%);
   z-index: 2;
-  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.coord-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.coord-clear:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .examples {
@@ -475,63 +500,10 @@ code {
   border-color: var(--color-primary);
 }
 
-.w3w-note {
+.card-note {
   font-size: 0.82rem;
   color: var(--color-text-muted);
-  padding: 0.5rem 0 0.4rem;
-}
-
-.muted {
-  color: var(--color-text-muted);
-}
-
-.link-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: var(--color-primary);
-  cursor: pointer;
-}
-
-.link-btn:hover {
-  text-decoration: underline;
-}
-
-.w3w-setup {
-  padding-bottom: 0.6rem;
-}
-
-.w3w-key-row {
-  display: flex;
-  gap: 0.5rem;
-  max-width: 28rem;
-}
-
-.w3w-key-input {
-  flex: 1;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  padding: 0.45rem 0.6rem;
-  color: var(--color-text);
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
-}
-
-.w3w-save {
-  padding: 0.45rem 0.9rem;
-  font-weight: 500;
-  color: white;
-  background: var(--color-primary);
-  border: none;
-  border-radius: 7px;
-  cursor: pointer;
-}
-
-.w3w-save:disabled {
-  opacity: 0.5;
-  cursor: default;
+  padding: 0.6rem 0 0.2rem;
 }
 
 .map-frame {
@@ -540,6 +512,12 @@ code {
   border: 1px solid var(--color-border);
   border-radius: 8px;
   display: block;
+  background: var(--color-background);
+}
+
+.map-frame .leaflet-tile {
+  /* Leaflet tiles must not inherit the global user-select / filter. */
+  filter: none;
 }
 
 .map-show-btn {

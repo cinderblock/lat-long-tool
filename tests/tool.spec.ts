@@ -104,6 +104,22 @@ test.describe("Latitude / Longitude Tool", () => {
       "href",
       /openstreetmap\.org\/\?mlat=40\.748817&mlon=-73\.985428/,
     );
+    const w3w = page.getByRole("link", { name: /what3words/ });
+    await expect(w3w).toHaveAttribute(
+      "href",
+      /what3words\.com\/.*center=40\.748817,-73\.985428/,
+    );
+  });
+
+  test("clears the input with the clear button", async ({ page }) => {
+    const input = page.locator("#coord-input");
+    await input.fill(NYC);
+    await expect(page.locator(".results")).toBeVisible();
+    await page.getByRole("button", { name: "Clear input" }).click();
+    await expect(input).toHaveValue("");
+    await expect(page.locator(".results")).toHaveCount(0);
+    await expect(page.locator(".examples")).toBeVisible();
+    expect(new URL(page.url()).searchParams.get("q")).toBeNull();
   });
 
   test("loading an example chip fills the input and updates the URL", async ({

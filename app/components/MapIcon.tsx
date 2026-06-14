@@ -4,6 +4,7 @@ import {
   siGooglemaps,
   siOpenstreetmap,
   siWaze,
+  siWhat3words,
 } from "simple-icons";
 
 // Brand glyphs (rendered in currentColor so they stay theme-aware). Services
@@ -14,6 +15,7 @@ const BRAND: Record<string, { path: string }> = {
   OpenStreetMap: siOpenstreetmap,
   "Google Earth": siGoogleearth,
   Waze: siWaze,
+  what3words: siWhat3words,
 };
 
 const PIN_PATH =
