@@ -26,9 +26,14 @@ export type { MapLink } from "./links";
 export type { Resolution } from "./precision";
 
 /** The point diametrically opposite on the globe. */
-export function antipode(c: Coordinate): { lat: number; lon: number } {
+export function antipode(c: Coordinate): Coordinate {
   const lon = c.lon > 0 ? c.lon - 180 : c.lon + 180;
-  return { lat: -c.lat, lon };
+  return {
+    lat: -c.lat,
+    lon,
+    latStepDeg: c.latStepDeg,
+    lonStepDeg: c.lonStepDeg,
+  };
 }
 
 /** A short description of which hemispheres the point sits in. */

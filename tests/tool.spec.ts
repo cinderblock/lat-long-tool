@@ -62,6 +62,15 @@ test.describe("Lat / Long Tool", () => {
     );
   });
 
+  test("attaches a hemisphere letter to its own value (1,3S)", async ({
+    page,
+  }) => {
+    await page.getByRole("textbox").fill("1,3S");
+    // The S binds to the 3, making it latitude South; the 1 is longitude.
+    await expect(page.locator(".results")).toContainText("3° S, 1° E");
+    await expect(page.locator(".assumption")).toHaveCount(0);
+  });
+
   test("shows an error for out-of-range input", async ({ page }) => {
     await page.getByRole("textbox").fill("200, 10");
     await expect(page.locator(".error")).toBeVisible();

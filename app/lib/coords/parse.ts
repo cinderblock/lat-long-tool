@@ -21,6 +21,8 @@ interface RawComponent {
   hemisphere?: Hemisphere;
   /** Resolution step in degrees implied by the least significant input digit. */
   stepDeg: number;
+  /** Character range [start, end) this component covers in the input. */
+  span: [number, number];
 }
 
 type TokenType = "num" | "hemi" | "deg" | "min" | "sec";
@@ -29,6 +31,9 @@ interface Token {
   text: string;
   value?: number;
   decimals?: number;
+  /** Character offsets of this token in the input string. */
+  start: number;
+  end: number;
 }
 
 const TOKEN_RE = new RegExp(
@@ -52,12 +57,18 @@ function tokenize(input: string): Token[] {
   const tokens: Token[] = [];
   for (const m of input.matchAll(TOKEN_RE)) {
     const g = m.groups!;
-    if (g.deg !== undefined) tokens.push({ type: "deg", text: m[0] });
-    else if (g.min !== undefined) tokens.push({ type: "min", text: m[0] });
-    else if (g.sec !== undefined) tokens.push({ type: "sec", text: m[0] });
-    else if (g.prime !== undefined) tokens.push({ type: "min", text: m[0] });
-    else if (g.hemi !== undefined) {
-      tokens.push({ type: "hemi", text: m[0].toUpperCase() });
+    const start = m.index;
+    const end = start + m[0].length;
+    if (g.deg !== undefined)
+      tokens.push({ type: "deg", text: m[0], start, end });
+    else if (g.min !== undefined) {
+      tokens.push({ type: "min", text: m[0], start, end });
+    } else if (g.sec !== undefined) {
+      tokens.push({ type: "sec", text: m[0], start, end });
+    } else if (g.prime !== undefined) {
+      tokens.push({ type: "min", text: m[0], start, end });
+    } else if (g.hemi !== undefined) {
+      tokens.push({ type: "hemi", text: m[0].toUpperCase(), start, end });
     } else if (g.num !== undefined) {
       const norm = m[0].replace("−", "-");
       tokens.push({
@@ -65,6 +76,8 @@ function tokenize(input: string): Token[] {
         text: norm,
         value: Math.abs(Number(norm)),
         decimals: decimalsOf(norm),
+        start,
+        end,
       });
     }
   }
@@ -82,7 +95,7 @@ function signOf(text: string): { sign: 1 | -1; hadSign: boolean } {
 /** Build a RawComponent from up to three numbers (deg, min, sec) + a hemisphere. */
 function buildComponent(
   nums: Token[],
-  hemisphere: Hemisphere | undefined,
+  hemiToken: Token | undefined,
 ): RawComponent {
   const deg = nums[0];
   const min = nums[1];
@@ -99,7 +112,21 @@ function buildComponent(
   else if (min) stepDeg = 10 ** -min.decimals! / 60;
   else stepDeg = 10 ** -deg.decimals!;
 
-  return { magnitude, numericSign: sign, hadSign, hemisphere, stepDeg };
+  // Character span: the numbers plus the hemisphere letter, if attached.
+  const parts = hemiToken ? [...nums, hemiToken] : nums;
+  const span: [number, number] = [
+    Math.min(...parts.map((t) => t.start)),
+    Math.max(...parts.map((t) => t.end)),
+  ];
+
+  return {
+    magnitude,
+    numericSign: sign,
+    hadSign,
+    hemisphere: hemiToken?.text as Hemisphere | undefined,
+    stepDeg,
+    span,
+  };
 }
 
 /**
@@ -125,7 +152,7 @@ function groupComponents(tokens: Token[]): {
 
   if (groups.length < 1) return { components: [], format, warnings };
 
-  // Each group is [deg, min?, sec?]. Attach hemisphere letters greedily 1:1.
+  // Each group is [deg, min?, sec?]. Attach hemisphere tokens greedily 1:1.
   const hemis = tokens.filter((t) => t.type === "hemi");
   const assigned = assignHemispheres(tokens, groups, hemis);
   const components = groups.map((g, i) => buildComponent(g, assigned[i]));
@@ -203,8 +230,8 @@ function assignHemispheres(
   tokens: Token[],
   groups: Token[][],
   hemis: Token[],
-): (Hemisphere | undefined)[] {
-  const result: (Hemisphere | undefined)[] = new Array(groups.length);
+): (Token | undefined)[] {
+  const result: (Token | undefined)[] = new Array(groups.length);
   if (hemis.length === 0) return result;
 
   const starts = groups.map((g) => tokens.indexOf(g[0]));
@@ -230,7 +257,7 @@ function assignHemispheres(
       }
     }
     if (best >= 0) {
-      result[best] = h.text as Hemisphere;
+      result[best] = h;
       used.add(best);
     }
   }
@@ -243,28 +270,32 @@ function parseUrl(input: string): {
   lon: number;
   latText: string;
   lonText: string;
+  latSpan?: [number, number];
+  lonSpan?: [number, number];
 } | null {
-  const s = input.trim();
   const num = "[+-]?\\d+(?:\\.\\d+)?";
   const patterns: RegExp[] = [
-    /geo:(?<lat>[+-]?\d+(?:\.\d+)?),(?<lon>[+-]?\d+(?:\.\d+)?)/i,
-    new RegExp(`@(?<lat>${num}),(?<lon>${num})`), // google maps @lat,lng
+    /geo:(?<lat>[+-]?\d+(?:\.\d+)?),(?<lon>[+-]?\d+(?:\.\d+)?)/di,
+    new RegExp(`@(?<lat>${num}),(?<lon>${num})`, "d"), // google maps @lat,lng
     new RegExp(
       `[?&](?:q|ll|sll|daddr|saddr)=(?<lat>${num}),(?<lon>${num})`,
-      "i",
+      "id",
     ),
-    new RegExp(`!3d(?<lat>${num})!4d(?<lon>${num})`), // google place
-    new RegExp(`mlat=(?<lat>${num}).*?mlon=(?<lon>${num})`, "i"), // osm marker
-    new RegExp(`#map=\\d+/(?<lat>${num})/(?<lon>${num})`), // osm hash
+    new RegExp(`!3d(?<lat>${num})!4d(?<lon>${num})`, "d"), // google place
+    new RegExp(`mlat=(?<lat>${num}).*?mlon=(?<lon>${num})`, "id"), // osm marker
+    new RegExp(`#map=\\d+/(?<lat>${num})/(?<lon>${num})`, "d"), // osm hash
   ];
   for (const re of patterns) {
-    const m = s.match(re);
+    const m = input.match(re);
     if (m?.groups) {
+      const gi = m.indices?.groups;
       return {
         lat: Number(m.groups.lat),
         lon: Number(m.groups.lon),
         latText: m.groups.lat,
         lonText: m.groups.lon,
+        latSpan: gi?.lat ? [gi.lat[0], gi.lat[1]] : undefined,
+        lonSpan: gi?.lon ? [gi.lon[0], gi.lon[1]] : undefined,
       };
     }
   }
@@ -294,7 +325,7 @@ export function parseCoordinates(
 
   // URLs / geo: URIs are unambiguous lat,lon.
   if (/:\/\//.test(trimmed) || /^geo:/i.test(trimmed)) {
-    const u = parseUrl(trimmed);
+    const u = parseUrl(input);
     if (u) {
       const coord: Coordinate = {
         lat: u.lat,
@@ -310,11 +341,14 @@ export function parseCoordinates(
         orderAmbiguous: false,
         warnings: warnings.list,
         error: warnings.fatal,
+        latSpan: u.latSpan,
+        lonSpan: u.lonSpan,
       };
     }
   }
 
-  const tokens = tokenize(trimmed);
+  // Tokenize the raw input so character spans align with what the user typed.
+  const tokens = tokenize(input);
   const { components, format, warnings } = groupComponents(tokens);
 
   if (components.length < 2) {
@@ -345,6 +379,8 @@ export function parseCoordinates(
     orderAmbiguous: resolved.orderAmbiguous,
     warnings,
     error: range.fatal,
+    latSpan: resolved.latSpan,
+    lonSpan: resolved.lonSpan,
   };
 }
 
@@ -366,7 +402,12 @@ function resolveRoles(
   b: RawComponent,
   assumptions: Assumptions,
   warnings: string[],
-): { coordinate: Coordinate; orderAmbiguous: boolean } {
+): {
+  coordinate: Coordinate;
+  orderAmbiguous: boolean;
+  latSpan: [number, number];
+  lonSpan: [number, number];
+} {
   const aAxis = axisOf(a);
   const bAxis = axisOf(b);
 
@@ -374,17 +415,16 @@ function resolveRoles(
   let lonC: RawComponent;
   let orderAmbiguous = false;
 
-  if (aAxis && bAxis && aAxis !== bAxis) {
-    // Hemisphere letters / magnitudes fully determine roles.
-    if (aAxis === "lat") ((latC = a), (lonC = b));
-    else ((latC = b), (lonC = a));
+  if (aAxis && bAxis && aAxis === bAxis) {
+    // Both values claim the same axis; keep input order but warn.
+    ((latC = a), (lonC = b));
+    warnings.push("Both values look like the same axis; check the result.");
+  } else if (aAxis === "lat" || bAxis === "lon") {
+    // a is latitude (or b is longitude) → natural order.
+    ((latC = a), (lonC = b));
   } else if (aAxis === "lon" || bAxis === "lat") {
-    // One side is forced; place accordingly.
-    if (aAxis === "lon") ((lonC = a), (latC = b));
-    else ((latC = a), (lonC = b));
-    if (aAxis && bAxis && aAxis === bAxis) {
-      warnings.push("Both values look like the same axis; check the result.");
-    }
+    // a is longitude (or b is latitude) → input is in lon, lat order.
+    ((latC = b), (lonC = a));
   } else {
     // No disambiguating information: assume first is latitude.
     orderAmbiguous = true;
@@ -408,6 +448,8 @@ function resolveRoles(
       lonStepDeg: lonC.stepDeg,
     },
     orderAmbiguous,
+    latSpan: latC.span,
+    lonSpan: lonC.span,
   };
 }
 

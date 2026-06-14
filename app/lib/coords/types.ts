@@ -35,4 +35,11 @@ export interface ParseResult {
   warnings: string[];
   /** Fatal reason when ok === false. */
   error?: string;
+  /** Character range [start, end) of the latitude part in the input, if known. */
+  latSpan?: [number, number];
+  /** Character range [start, end) of the longitude part in the input, if known. */
+  lonSpan?: [number, number];
 }
+
+/** A coordinate span pair (used to colour-highlight the input). */
+export type Spans = { latSpan?: [number, number]; lonSpan?: [number, number] };
